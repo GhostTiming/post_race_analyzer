@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post-Race Analyzer</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload Raw Data File</h2>
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="datafile" required>
+        <button type="submit">Analyze</button>
+    </form>
+
+    {% if results %}
+    <hr>
+    <h3>Results</h3>
+    <button onclick="downloadCSV()">Download as CSV</button>
+    <br><br>
+    <table id="resultsTable" class="display">
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>Port</th>
+                <th>Count</th>
+                <th>% Device Reads</th>
+                <th>Avg RSSI</th>
+                <th>Avg Stat</th>
+                <th>Strong</th>
+                <th>Good</th>
+                <th>Weak</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr>
+                <td>{{ row.device }}</td>
+                <td>{{ row.port }}</td>
+                <td>{{ row.count }}</td>
+                <td>{{ row.percent }}</td>
+                <td>{{ row.avg_rssi }}</td>
+                <td>{{ row.avg_stat }}</td>
+                <td>{{ row.strong }}</td>
+                <td>{{ row.good }}</td>
+                <td>{{ row.weak }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#resultsTable').DataTable();
+        });
+
+        function downloadCSV() {
+            const rows = [...document.querySelectorAll('#resultsTable tr')];
+            const csv = rows.map(row =>
+                [...row.querySelectorAll('th,td')]
+                    .map(cell => cell.innerText)
+                    .join(',')
+            ).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'post_race_analysis.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
